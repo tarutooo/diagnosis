@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>宇宙人診断テスト</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #1a1a2e;
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background-color: #16213e;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .quiz-container {
+      padding: 40px;
+    }
+
+    .question-card {
+      display: none;
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border-left: 4px solid #4a69bd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .question-card.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .question-number {
+      color: #4a69bd;
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 15px;
+    }
+
+    .question-text {
+      font-size: 1.4em;
+      color: #333;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .options {
+      display: grid;
+      gap: 15px;
+    }
+
+    .option-button {
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    .option-button:hover {
+      border-color: #4a69bd;
+      background-color: #f5f5f5;
+    }
+
+    .option-button.selected {
+      border-color: #4a69bd;
+      background-color: #4a69bd;
+      color: white;
+    }
+
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 40px;
+    }
+
+    .nav-button {
+      background-color: #4a69bd;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: background-color 0.3s ease;
+    }
+
+    .nav-button:hover {
+      background-color: #3c5aa6;
+    }
+
+    .nav-button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .progress-bar {
+      background: #e0e0e0;
+      height: 8px;
+      border-radius: 4px;
+      margin: 20px 40px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background-color: #4a69bd;
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .result-container {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .result-container.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .result-icon {
+      font-size: 5em;
+      margin-bottom: 20px;
+    }
+
+    .result-title {
+      font-size: 2.5em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .result-description {
+      font-size: 1.3em;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .restart-button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.2em;
+      transition: background-color 0.3s ease;
+    }
+
+    .restart-button:hover {
+      background-color: #c0392b;
+    }
+
+    .start-screen {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .start-screen h2 {
+      color: #333;
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .start-screen p {
+      color: #666;
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .start-button {
+      background-color: #4a69bd;
+      color: white;
+      border: none;
+      padding: 20px 50px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.3em;
+      transition: background-color 0.3s ease;
+    }
+
+    .start-button:hover {
+      background-color: #3c5aa6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>宇宙人診断テスト</h1>
+      <p>あなたの宇宙人タイプを発見しよう！</p>
+    </div>
+
+    <div class="start-screen" id="startScreen">
+      <h2>宇宙探査を始めましょう</h2>
+      <p>13つの質問に答えて、あなたがどの星系の宇宙人なのかを診断します。<br>
+      宇宙の直感に従って答えてください！</p>
+      <button class="start-button" onclick="startQuiz()">宇宙人診断スタート</button>
+    </div>
+
+    <div class="progress-bar" id="progressBar" style="display: none;">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="quiz-container" id="quizContainer" style="display: none;">
+      <!-- 質問がここに動的に表示されます -->
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-icon" id="resultIcon"></div>
+      <h2 class="result-title" id="resultTitle"></h2>
+      <p class="result-description" id="resultDescription"></p>
+      <button class="restart-button" onclick="restartQuiz()">再び宇宙探査する</button>
+    </div>
+  </div>
+
+  <script>
+    // 質問データ（宇宙人診断）13問
+    const questions = [
+      {
+        question: "独自の基準とこだわりがありますか？",
+        options: [
+          { text: "はい", points: 4 },
+          { text: "部分的にはい", points: 3 },
+          { text: "いいえ", points: 1 },
+          { text: "部分的にいいえ", points: 2 }
+        ]
+      },
+      {
+        question: "頭の回転は速いですか？",
+        options: [
+          { text: "はい", points: 4 },
+          { text: "部分的にはい", points: 3 },
+          { text: "いいえ", points: 1 },
+          { text: "部分的にいいえ", points: 2 }
+        ]
+      },
+      {
+        question: "社交性はありますか？",
+        options: [
+          { text: "はい", points: 1 },
+          { text: "部分的にはい", points: 2 },
+          { text: "いいえ", points: 4 },
+          { text: "部分的にいいえ", points: 3 }
+        ]
+      },
+      {
+        question: "感情を出すことがよくありますか？",
+        options: [
+          { text: "はい", points: 1 },
+          { text: "部分的にはい", points: 2 },
+          { text: "いいえ", points: 4 },
+          { text: "部分的にいいえ", points: 3 }
+        ]
+      },
+      {
+        question: "独特な価値観を持っていますか？",
+        options: [
+          { text: "はい", points: 4 },
+          { text: "部分的にはい", points: 3 },
+          { text: "いいえ", points: 1 },
+          { text: "部分的にいいえ", points: 2 }
+        ]
+      },
+      {
+        question: "論理的な考え方を大切にしていますか？",
+        options: [
+          { text: "はい", points: 4 },
+          { text: "部分的にはい", points: 3 },
+          { text: "いいえ", points: 1 },
+          { text: "部分的にいいえ", points: 2 }
+        ]
+      },
+      {
+        question: "洞察力は高いですか？",
+        options: [
+          { text: "はい", points: 4 },
+          { text: "部分的にはい", points: 3 },
+          { text: "いいえ", points: 1 },
+          { text: "部分的にいいえ", points: 2 }
+        ]
+      },
+      {
+        question: "現実的な考え方をよくしますか？",
+        options: [
+          { text: "はい", points: 1 },
+          { text: "部分的にはい", points: 2 },
+          { text: "いいえ", points: 4 },
+          { text: "部分的にいいえ", points: 3 }
+        ]
+      },
+      {
+        question: "周りが見えなくなるくらい集中することはありますか？",
+        options: [
+          { text: "はい", points: 4 },
+          { text: "部分的にはい", points: 3 },
+          { text: "いいえ", points: 1 },
+          { text: "部分的にいいえ", points: 2 }
+        ]
+      },
+      {
+        question: "一人で考え込むことがよくありますか？",
+        options: [
+          { text: "はい", points: 4 },
+          { text: "部分的にはい", points: 3 },
+          { text: "いいえ", points: 1 },
+          { text: "部分的にいいえ", points: 2 }
+        ]
+      },
+      {
+        question: "周りの人からの印象は？",
+        options: [
+          { text: "活発的", points: 1 },
+          { text: "クール", points: 4 },
+          { text: "マイペース", points: 2 },
+          { text: "おっとり", points: 3 }
+        ]
+      },
+      {
+        question: "一人の時間はどのくらいありますか？",
+        options: [
+          { text: "たくさん", points: 4 },
+          { text: "そこそこある", points: 3 },
+          { text: "あまりない", points: 2 },
+          { text: "ほぼない", points: 1 }
+        ]
+      },
+      {
+        question: "直感で動くことが多いですか？",
+        options: [
+         { text: "はい", points: 4 },
+          { text: "部分的にはい", points: 3 },
+          { text: "いいえ", points: 1 },
+          { text: "部分的にいいえ", points: 2 }
+        ]
+      }
+    ];
+
+    // 診断結果データ（ポイント範囲で決定）
+    const results = [
+      {
+        minPoints: 13,
+        maxPoints: 24,
+        title: "地球人",
+        description: "あなたは普通の地球人です。安心してください。"
+      },
+      {
+        minPoints: 25,
+        maxPoints: 29,
+        title: "少し怪しい地球人",
+        description: "あなたには少しだけ宇宙人の血が混じっています、もしかしたら先祖が宇宙人かも！？"
+      },
+      {
+        minPoints: 30,
+        maxPoints: 34,
+        title: "ぎりぎり地球人",
+        description: "宇宙生まれ地球育ちの宇宙人です、記憶に残っていませんが子供の頃は宇宙で生活していました。"
+      },
+      {
+        minPoints: 35,
+        maxPoints: 39,
+        title: "ほぼ宇宙人",
+        description: "あなたは最近地球に来た宇宙人です、地球の生活には慣れましたか？"
+      },
+      {
+        minPoints: 40,
+        maxPoints: 42,
+        title: "宇宙人",
+        description: "あなたは地球を侵略しに来た宇宙人です。自分の星に帰ってください"
+      }
+    ];
+
+    let currentQuestion = 0;
+    let answers = [];
+    let totalPoints = 0;
+    let quizStarted = false;
+
+    function startQuiz() {
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('progressBar').style.display = 'block';
+      document.getElementById('quizContainer').style.display = 'block';
+      quizStarted = true;
+      currentQuestion = 0;
+      answers = [];
+      totalPoints = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const container = document.getElementById('quizContainer');
+      const question = questions[currentQuestion];
+      
+      container.innerHTML = `
+        <div class="question-card active">
+          <div class="question-number">質問 ${currentQuestion + 1} / ${questions.length}</div>
+          <div class="question-text">${question.question}</div>
+          <div class="options">
+            ${question.options.map((option, index) => `
+              <button class="option-button" onclick="selectOption(${index})">
+                ${option.text}
+              </button>
+            `).join('')}
+          </div>
+          <div class="navigation">
+            <button class="nav-button" onclick="previousQuestion()" ${currentQuestion === 0 ? 'disabled' : ''}>
+              前の質問
+            </button>
+            <button class="nav-button" id="nextButton" onclick="nextQuestion()" disabled>
+              ${currentQuestion === questions.length - 1 ? '結果を見る' : '次の質問'}
+            </button>
+          </div>
+        </div>
+      `;
+
+      updateProgressBar();
+    }
+
+    function selectOption(optionIndex) {
+      const buttons = document.querySelectorAll('.option-button');
+      buttons.forEach(btn => btn.classList.remove('selected'));
+      buttons[optionIndex].classList.add('selected');
+      
+      // 前の回答のポイントを引く（変更の場合）
+      if (answers[currentQuestion]) {
+        totalPoints -= answers[currentQuestion].points;
+      }
+      
+      // 新しい回答のポイントを加算
+      const selectedOption = questions[currentQuestion].options[optionIndex];
+      answers[currentQuestion] = selectedOption;
+      totalPoints += selectedOption.points;
+      
+      document.getElementById('nextButton').disabled = false;
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function previousQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion();
+      }
+    }
+
+    function updateProgressBar() {
+      const progress = ((currentQuestion + 1) / questions.length) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    function showResult() {
+      // ポイントに基づいて結果を決定
+      let result = results[0]; // デフォルトは最初の結果
+      
+      for (let i = 0; i < results.length; i++) {
+        if (totalPoints >= results[i].minPoints && totalPoints <= results[i].maxPoints) {
+          result = results[i];
+          break;
+        }
+      }
+
+      document.getElementById('quizContainer').style.display = 'none';
+      document.getElementById('progressBar').style.display = 'none';
+      document.getElementById('resultContainer').style.display = 'block';
+      document.getElementById('resultContainer').classList.add('show');
+      
+      document.getElementById('resultIcon').textContent = result.icon;
+      document.getElementById('resultTitle').textContent = result.title;
+      document.getElementById('resultDescription').textContent = result.description + ` (合計ポイント: ${totalPoints}点)`;
+    }
+
+    function restartQuiz() {
+      document.getElementById('resultContainer').style.display = 'none';
+      document.getElementById('resultContainer').classList.remove('show');
+      document.getElementById('startScreen').style.display = 'block';
+      currentQuestion = 0;
+      answers = [];
+      totalPoints = 0;
+      quizStarted = false;
+    }
+  </script>
+</body>
+</html>
